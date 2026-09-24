@@ -1,0 +1,1355 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  ArrowRight, 
+  Check, 
+  Leaf, 
+  Sparkles, 
+  ShieldCheck, 
+  Sun, 
+  Layers, 
+  Phone, 
+  MapPin, 
+  Globe, 
+  ShoppingBag, 
+  X, 
+  Menu, 
+  Truck
+} from 'lucide-react';
+
+export interface Product {
+  id: number;
+  code: string;
+  category: 'shirt' | 'polo' | 'heritage' | 'kids';
+  name: string;
+  material: string;
+  features: string[];
+  price: string;
+  image: string;
+  badge: string;
+  desc: string;
+}
+
+export interface FeaturedCollection {
+  id: string;
+  tag: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  category: 'shirt' | 'polo' | 'heritage' | 'kids';
+  desc: string;
+}
+
+export interface Category {
+  id: string;
+  label: string;
+}
+
+export interface ConsultationItem extends Product {
+  size: string;
+  addedAt: number;
+}
+
+// --- 100% ẢNH THỰC TẾ TỪ CATALOGUE VÀ TƯ LIỆU NỘI BỘ HDC GROUP ---
+const ASSETS = {
+  // TRANG BÌA CHÍNH (Đúng tệp 0001.jpg người dùng chỉ định)
+  heroCover: './TaiLieu/2023-12-28_Catalogue đồng phục_1/0001.jpg',
+  heroCoverFallback: './assets/0001.jpg',
+
+  // Các trang Catalogue gốc (Trùng khớp 100% cấu trúc Figma thiết kế)
+  cat01: './assets/0001.jpg', // Bìa chính Sơ mi xanh
+  cat02: './assets/0002.jpg', // Trang Chất liệu xanh bền vững
+  cat03: './assets/0003.jpg', // Trang Công nghệ sơ mi Seamless
+  cat04: './assets/0004.jpg', // Trang Di sản Văn hóa Việt Nam
+  cat05: './assets/0005.jpg', // Trang Sơ mi Doanh nhân
+  cat06: './assets/0006.jpg', // Trang Polo Năng động
+  cat07: './assets/0007.jpg', // Trang Đồng phục Doanh nghiệp
+  cat08: './assets/0008.jpg', // Trang Golf & Sự kiện
+  cat09: './assets/0009.jpg', // Trang Đồng phục Học sinh IHDC Kids
+  cat10: './assets/0010.jpg', // Trang Tại sao là IHDC Kids
+  cat11: './assets/0011.jpg', // Trang Best Sellers IHDC Kids
+  cat12: './assets/0012.jpg', // Trang Sơ mi & Polo Kids
+
+  // Ảnh lãnh đạo & Chi tiết từ nội bộ doanh nghiệp
+  founder: './assets/founder_ceo.jpg',
+  team: './assets/hdc_team.jpg',
+  seamlessCuff: './assets/seamless_cuff_detail.jpg',
+  cultureTrongDong: './assets/culture_trong_dong_co.jpg',
+  cultureNuiDauRong: './assets/culture_nui_dau_rong.jpg',
+  shirtGreenNatural: './assets/shirt_natural_green.png',
+  poloOrangeCollar: './assets/polo_orange_collar.png',
+  poloWhiteNavy: './assets/polo_white_navy.png',
+  golfTournament: './assets/golf_tournament_dnt.jpg',
+  kidsPoloOrange: './assets/kids_polo_orange.png',
+  kidsUniformGileSkirt: './assets/kids_uniform_gile_skirt.png',
+  kidsUniformBoySet: './assets/kids_uniform_boy_set.png'
+};
+
+const FEATURED_COLLECTIONS: FeaturedCollection[] = [
+  {
+    id: 'so-mi',
+    tag: '01 / HDC',
+    title: 'Sơ mi Doanh nhân & Seamless',
+    subtitle: '100% sợi tự nhiên · Công nghệ không đường may · Siêu êm nhẹ',
+    image: ASSETS.cat01,
+    category: 'shirt',
+    desc: 'Được chế tác từ Modal, Bamboo và công nghệ sơ mi Seamless liền mạch (áp dụng tại tay áo, nẹp áo, vạt áo), co giãn 4 chiều mềm mịn không cần là ủi.'
+  },
+  {
+    id: 'polo-golf',
+    tag: '02 / HDC',
+    title: 'Polo Năng Động & Golf Anti-UV',
+    subtitle: 'Bảo vệ tia cực tím · Khô thoáng vượt trội · Đa dạng sắc màu',
+    image: ASSETS.cat06,
+    category: 'polo',
+    desc: 'Đồng phục Polo sự kiện và giải Golf cao cấp, tích hợp công nghệ chống nắng Anti-UV bảo vệ làn da tối ưu khi vận động ngoài trời.'
+  },
+  {
+    id: 'di-san',
+    tag: '03 / HDC',
+    title: 'Golf & Sự Kiện Thương Hiệu',
+    subtitle: 'Giải Golf 30 năm DNT Việt Nam · Khẳng định bản lĩnh thủ lĩnh',
+    image: ASSETS.cat08,
+    category: 'polo',
+    desc: 'Trang phục thi đấu chính thức tại các giải Golf danh giá, truyền cảm hứng chiến thắng và định hình phong thái người dẫn đầu.'
+  },
+  {
+    id: 'ihdc-kids',
+    tag: '04 / HDC',
+    title: 'Đồng Phục Học Sinh IHDC Kids',
+    subtitle: 'Form suông vừa vặn · Set gile & chân váy · Êm nhẹ không gò bó',
+    image: ASSETS.cat11,
+    category: 'kids',
+    desc: 'Thời trang học đường mang chuẩn mực thanh lịch, vải kháng khuẩn an toàn tuyệt đối cho làn da nhạy cảm của các em học sinh.'
+  }
+];
+
+const ALL_PRODUCTS: Product[] = [
+  {
+    id: 1,
+    code: 'HDC-SM 01',
+    category: 'shirt',
+    name: 'Sơ mi Xanh Sợi Tự Nhiên (Natural Green)',
+    material: '100% Sợi Sen & Bamboo sinh học',
+    features: ['Kháng khuẩn tự nhiên', 'Không nhăn, không cần là ủi', 'Mát lạnh êm mịn'],
+    price: 'May đo theo số lượng',
+    image: ASSETS.shirtGreenNatural,
+    badge: 'Chất liệu xanh',
+    desc: 'Sơ mi cao cấp chiết xuất sợi tự nhiên từ vùng nguyên liệu Việt Nam. Cực kỳ thoáng khí, thấm hút mồ hôi và bền màu sau hàng trăm lần giặt.'
+  },
+  {
+    id: 2,
+    code: 'HDC-SM 02',
+    category: 'shirt',
+    name: 'Sơ mi Seamless Công Nghệ Không Đường May',
+    material: 'Vải co giãn 4 chiều siêu nhẹ & Modal',
+    features: ['Liền mạch ở tay, nẹp và vạt', 'Siêu nhẹ ôm form', 'Không cọ xát da'],
+    price: 'May đo doanh nghiệp',
+    image: ASSETS.cat03,
+    badge: 'Công nghệ Seamless',
+    desc: 'Đột phá kỹ thuật với công nghệ ép nhiệt không đường may tiên tiến nhất. Mang lại trải nghiệm nhẹ như không, sang trọng và chuẩn mực doanh nhân.'
+  },
+  {
+    id: 3,
+    code: 'HDC-SM 03',
+    category: 'shirt',
+    name: 'Bộ Sưu Tập Sơ Mi Doanh Nhân Cao Cấp',
+    material: 'Sợi Bamboo & Modal dệt mật độ cao',
+    features: ['Ngắn tay & Dài tay', 'Thấm hút thông minh', 'Cổ áo đứng phom'],
+    price: 'Đồng phục công sở',
+    image: ASSETS.cat05,
+    badge: 'Best Seller',
+    desc: 'Thiết kế sơ mi dài tay và ngắn tay thanh lịch chuẩn mực dành cho khối văn phòng, ngân hàng và sự kiện trang trọng.'
+  },
+  {
+    id: 4,
+    code: 'HDC-CL 01',
+    category: 'heritage',
+    name: 'Sơ mi Di Sản Văn Hóa Núi Đầu Rồng & Hang Xóm Trại',
+    material: 'Sợi tơ chuối kết hợp Bamboo hữu cơ',
+    features: ['Họa tiết văn hóa độc bản', 'Kháng khuẩn tự nhiên', 'Gìn giữ nguồn bản địa'],
+    price: 'Phiên bản Di sản',
+    image: ASSETS.cultureNuiDauRong,
+    badge: 'Di sản Việt',
+    desc: 'Khắc họa các biểu tượng văn hóa khảo cổ ngàn năm của người Việt, truyền tải thông điệp văn hóa và niềm kiêu hãnh dân tộc.'
+  },
+  {
+    id: 5,
+    code: 'HDC-CL 02',
+    category: 'heritage',
+    name: 'Sơ mi Họa Tiết Trống Đồng Cổ & Suối Nước Nóng Kim Bôi',
+    material: 'Sợi bạc hà & Xơ dừa sinh thái bản địa',
+    features: ['Mát lạnh sảng khoái', 'Họa tiết Trống đồng cổ', 'Bền bỉ, giữ form'],
+    price: 'Phiên bản Di sản',
+    image: ASSETS.cultureTrongDong,
+    badge: 'Di sản Việt',
+    desc: 'Kết hợp xơ dừa tự nhiên với sợi bạc hà tạo nên chất liệu bền chắc kỳ diệu, họa tiết Trống Đồng Cổ thiêng liêng tôn vinh nguồn cội.'
+  },
+  {
+    id: 6,
+    code: 'HDC-PL 01',
+    category: 'polo',
+    name: 'Áo Polo Năng Động Cổ Phối Cam Nổi Bật',
+    material: 'Cotton Compact sinh thái & Sợi Bạc Hà',
+    features: ['Cổ bẻ lịch lãm', 'Co giãn 4 chiều', 'Bền màu giữ form'],
+    price: 'Đặt may từ 10 áo',
+    image: ASSETS.poloOrangeCollar,
+    badge: 'Trẻ trung, năng động',
+    desc: 'Thiết kế polo trẻ trung dành cho các doanh nghiệp hiện đại. Form dáng chuẩn vừa vặn, màu sắc tươi sáng tôn vinh bản sắc thương hiệu.'
+  },
+  {
+    id: 7,
+    code: 'HDC-PL 02',
+    category: 'polo',
+    name: 'Áo Polo Signature Trắng Phối Navy Lịch Lãm',
+    material: 'Vải dệt cá sấu mắt chim siêu thoáng',
+    features: ['Thấm hút mồ hôi', 'Bo cổ dệt hoa văn', 'Không bai nhão'],
+    price: 'Đồng phục doanh nghiệp',
+    image: ASSETS.poloWhiteNavy,
+    badge: 'Doanh nghiệp',
+    desc: 'Mẫu áo polo đồng phục doanh nghiệp bán chạy nhất tại HDC Fashion, mang lại phong thái đĩnh đạc và tinh tế.'
+  },
+  {
+    id: 8,
+    code: 'HDC-GF 01',
+    category: 'polo',
+    name: 'Đồng Phục Polo Golf Anti-UV Kháng Khuẩn',
+    material: 'Sợi kỹ thuật chống tia cực tím UPF 50+',
+    features: ['Chống nắng bảo vệ da', 'Khô nhanh Quick-dry', 'Thoáng khí giải nhiệt'],
+    price: 'Giải đấu & Doanh nhân',
+    image: ASSETS.cat08,
+    badge: 'Tính năng Anti UV',
+    desc: 'Trang phục thi đấu chính thức tại các giải Golf chuyên nghiệp (Giải Golf kỷ niệm 30 năm phong trào DNT Việt Nam). Bảo vệ làn da tuyệt đối dưới nắng gắt.'
+  },
+  {
+    id: 9,
+    code: 'HDC-KD 01',
+    category: 'kids',
+    name: 'Polo Trẻ Em Sắc Màu (IHDC Kids)',
+    material: '100% Cotton hữu cơ & Bamboo siêu mềm',
+    features: ['Form suông không gò bó', 'Kháng khuẩn bảo vệ da bé', 'Đầy đủ bảng màu'],
+    price: 'Đồng phục trường học',
+    image: ASSETS.kidsPoloOrange,
+    badge: 'IHDC Kids',
+    desc: 'May theo form dáng suông vừa vặn, không gây áp lực vận động cho học sinh. Vải mềm mát, độ thấm hút mồ hôi tối đa giúp các em tự tin học hỏi.'
+  },
+  {
+    id: 10,
+    code: 'HDC-KD 02',
+    category: 'kids',
+    name: 'Set Sơ Mi Gile & Chân Váy Học Sinh Cao Cấp',
+    material: 'Vải tổng hợp sợi tự nhiên cao cấp',
+    features: ['Set đồng bộ thanh lịch', 'Không nhăn xù vải', 'Đường may êm ái'],
+    price: 'Thiết kế học đường',
+    image: ASSETS.kidsUniformGileSkirt,
+    badge: 'IHDC Kids',
+    desc: 'Thiết kế trang nhã theo phong cách đồng phục học đường quốc tế. Đảm bảo vẻ đẹp chỉn chu, tươi sáng và cảm giác thoải mái suốt cả ngày học tập.'
+  },
+  {
+    id: 11,
+    code: 'HDC-KD 03',
+    category: 'kids',
+    name: 'Set Đồng Phục Học Sinh Nam Thanh Lịch',
+    material: 'Cotton sinh thái & Sợi Sen mềm mịn',
+    features: ['Form suông đứng dáng', 'Dễ giặt phơi mau khô', 'Êm ái cho làn da'],
+    price: 'May đo trường học',
+    image: ASSETS.kidsUniformBoySet,
+    badge: 'IHDC Kids',
+    desc: 'Bộ đồng phục chỉn chu cho học sinh nam với chất vải an toàn, thoáng mát, giúp các em luôn năng động và thoải mái trong mọi hoạt động.'
+  }
+];
+
+const CATEGORIES: Category[] = [
+  { id: 'all', label: 'Tất cả mẫu' },
+  { id: 'shirt', label: 'Sơ mi Xanh & Seamless' },
+  { id: 'polo', label: 'Polo & Golf Anti-UV' },
+  { id: 'heritage', label: 'BST Di sản Văn hóa' },
+  { id: 'kids', label: 'Đồng phục IHDC Kids' }
+];
+
+export default function HDCFashionEcommerce() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'home' | 'shop'>('home');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>('L');
+  const [consultationList, setConsultationList] = useState<ConsultationItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phone: '',
+    company: '',
+    category: 'Sơ mi & Seamless',
+    quantity: '50-200 áo',
+    notes: ''
+  });
+  const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
+  const [activePreview, setActivePreview] = useState<FeaturedCollection>(FEATURED_COLLECTIONS[0]);
+
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === 'all') return ALL_PRODUCTS;
+    return ALL_PRODUCTS.filter(p => p.category === activeCategory);
+  }, [activeCategory]);
+
+  const scrollToSection = (id: string) => {
+    setIsMobileMenuOpen(false);
+    if (currentView !== 'home') {
+      setCurrentView('home');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 120);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleAddToQuote = (prod: Product) => {
+    const item: ConsultationItem = { ...prod, size: selectedSize, addedAt: Date.now() };
+    setConsultationList(prev => [...prev, item]);
+    setSelectedProduct(null);
+    setIsCartOpen(true);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsFormSubmitted(true);
+    setTimeout(() => {
+      setIsFormSubmitted(false);
+      setFormData({ fullName: '', phone: '', company: '', category: 'Sơ mi & Seamless', quantity: '50-200 áo', notes: '' });
+    }, 5000);
+  };
+
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-[#f6f7f4] text-[#102a32] flex flex-col font-sans">
+      
+      {/* TOP ANNOUNCEMENT BANNER */}
+      <div className="bg-[#0d3039] px-5 py-2.5 text-center text-[10px] font-semibold tracking-[0.18em] text-[#e4c36f] sm:text-xs">
+        HDC FASHION · THIẾT KẾ & MAY ĐO ĐỒNG PHỤC DOANH NGHIỆP TOÀN QUỐC · HOTLINE: 0984 95 95 86
+      </div>
+
+      {/* STICKY HEADER */}
+      <header className="sticky top-0 z-40 border-b border-[#153e47]/10 bg-[#f6f7f4]/95 backdrop-blur">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+          
+          <button 
+            onClick={() => { setCurrentView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+            className="flex items-center gap-3 text-left focus:outline-none"
+            aria-label="Về đầu trang HDC Fashion"
+          >
+            <span className="grid h-10 w-10 place-items-center bg-[#0d9bb4] text-xl font-black tracking-tighter text-white shadow-sm">
+              H
+            </span>
+            <span>
+              <b className="block text-lg leading-none tracking-tight text-[#102a32]">HDC</b>
+              <span className="text-[9px] font-bold tracking-[0.24em] text-[#168ca5]">FASHION</span>
+            </span>
+          </button>
+
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-[#284850] lg:flex">
+            <button 
+              onClick={() => setCurrentView('home')} 
+              className={`transition hover:text-[#0d9bb4] ${currentView === 'home' ? 'text-[#0d9bb4]' : ''}`}
+            >
+              Trang chủ
+            </button>
+            <button 
+              onClick={() => { setCurrentView('shop'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+              className={`transition hover:text-[#0d9bb4] flex items-center gap-1.5 ${currentView === 'shop' ? 'text-[#0d9bb4]' : ''}`}
+            >
+              Gian hàng
+              <span className="bg-[#0d9bb4]/15 text-[#0b8faa] text-[10px] px-1.5 py-0.5 rounded font-bold">New</span>
+            </button>
+            <button onClick={() => scrollToSection('chat-lieu')} className="transition hover:text-[#0d9bb4]">
+              Chất liệu xanh
+            </button>
+            <button onClick={() => scrollToSection('cong-nghe')} className="transition hover:text-[#0d9bb4]">
+              Seamless 4D
+            </button>
+            <button onClick={() => scrollToSection('du-an')} className="transition hover:text-[#0d9bb4]">
+              Dự án & Di sản
+            </button>
+            <button onClick={() => scrollToSection('ve-hdc')} className="transition hover:text-[#0d9bb4]">
+              Về HDC
+            </button>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2.5 text-[#0d3039] hover:text-[#0d9bb4] transition border border-[#153e47]/15 rounded-sm"
+              title="Danh sách mẫu cần báo giá"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {consultationList.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-[#e4c36f] text-[#102a32] text-[10px] font-bold h-5 w-5 rounded-full grid place-items-center">
+                  {consultationList.length}
+                </span>
+              )}
+            </button>
+
+            <button 
+              onClick={() => scrollToSection('lien-he')} 
+              className="hidden bg-[#0d3039] px-5 py-3 text-xs font-bold tracking-[0.12em] text-white transition hover:bg-[#0d9bb4] lg:block"
+            >
+              NHẬN BÁO GIÁ
+            </button>
+
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="grid h-10 w-10 place-items-center border border-[#153e47]/20 lg:hidden focus:outline-none"
+              aria-label="Mở menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+
+        </div>
+
+        {isMobileMenuOpen && (
+          <nav className="border-t border-[#153e47]/10 bg-[#f6f7f4] px-5 py-5 lg:hidden">
+            <div className="mx-auto grid max-w-7xl gap-4 text-sm font-semibold">
+              <button onClick={() => { setCurrentView('home'); setIsMobileMenuOpen(false); }} className="text-left py-2 hover:text-[#0d9bb4] border-b border-gray-200">
+                Trang chủ
+              </button>
+              <button onClick={() => { setCurrentView('shop'); setIsMobileMenuOpen(false); }} className="text-left py-2 text-[#0d9bb4] font-bold border-b border-gray-200 flex justify-between items-center">
+                <span>Gian hàng E-Commerce</span>
+                <span className="bg-[#0d9bb4] text-white text-[10px] px-2 py-0.5">XEM NGAY</span>
+              </button>
+              <button onClick={() => scrollToSection('chat-lieu')} className="text-left py-2 hover:text-[#0d9bb4] border-b border-gray-200">
+                Chất liệu xanh bền vững
+              </button>
+              <button onClick={() => scrollToSection('cong-nghe')} className="text-left py-2 hover:text-[#0d9bb4] border-b border-gray-200">
+                Công nghệ Seamless sơ mi
+              </button>
+              <button onClick={() => scrollToSection('du-an')} className="text-left py-2 hover:text-[#0d9bb4] border-b border-gray-200">
+                Dự án & Di sản văn hóa
+              </button>
+              <button onClick={() => scrollToSection('ve-hdc')} className="text-left py-2 hover:text-[#0d9bb4] border-b border-gray-200">
+                Về HDC & Ban lãnh đạo
+              </button>
+              <button onClick={() => scrollToSection('lien-he')} className="bg-[#0d3039] text-white text-center py-3 text-xs font-bold tracking-[0.12em] mt-2">
+                ĐẶT THIẾT KẾ ĐỒNG PHỤC
+              </button>
+            </div>
+          </nav>
+        )}
+      </header>
+
+      {/* MAIN CONTENT */}
+      {currentView === 'shop' ? (
+        <main className="flex-1">
+          <section className="border-b border-[#153e47]/10 bg-[#e2eff1]">
+            <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                  <p className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4]">HDC FASHION / GIAN HÀNG MAY ĐO</p>
+                  <h1 className="font-serif mt-3 text-4xl leading-[0.95] sm:text-5xl lg:text-6xl text-[#10313a]">
+                    Bộ sưu tập <br />
+                    <em className="font-normal text-[#0d9bb4]">đồng phục đặc sắc.</em>
+                  </h1>
+                  <p className="mt-4 max-w-xl text-base leading-7 text-[#597077]">
+                    100% hình ảnh thực tế từ Catalogue HDC Fashion. Mọi sản phẩm đều may từ sợi tự nhiên bản địa, công nghệ Seamless co giãn 4 chiều hoặc may đo độc quyền.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setCurrentView('home')} 
+                  className="w-fit text-xs font-bold tracking-[0.14em] text-[#0d3039] hover:text-[#0d9bb4] flex items-center gap-2 border-b border-[#0d3039] pb-1"
+                >
+                  ← VỀ TRANG GIỚI THIỆU CHÍNH
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+            <div className="flex flex-wrap gap-2.5 border-b border-[#153e47]/15 pb-8">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-4 py-3 text-xs font-bold tracking-[0.1em] transition ${
+                    activeCategory === cat.id
+                      ? 'bg-[#0d3039] text-white shadow-sm'
+                      : 'border border-[#153e47]/20 text-[#46636a] hover:border-[#0d9bb4] hover:text-[#0d9bb4]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-8 flex items-center justify-between">
+              <p className="text-xs font-bold tracking-[0.15em] text-[#0d9bb4]">
+                HIỂN THỊ {filteredProducts.length.toString().padStart(2, '0')} MẪU THIẾT KẾ ĐỘC BẢN (ẢNH THỰC TẾ)
+              </p>
+              <p className="text-xs text-[#6d858a]">Bấm vào từng mẫu để xem chi tiết thông số và nhận báo giá</p>
+            </div>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredProducts.map(prod => (
+                <div 
+                  key={prod.id}
+                  className="group overflow-hidden bg-white text-left shadow-sm border border-[#153e47]/10 transition hover:-translate-y-1.5 hover:shadow-xl flex flex-col"
+                >
+                  <div className="relative aspect-[1/1] overflow-hidden bg-[#e8eef0]">
+                    <img 
+                      src={prod.image}
+                      alt={prod.name}
+                      className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105"
+                    />
+                    <span className="absolute left-3 top-3 bg-[#0d3039] text-[#e4c36f] px-2.5 py-1 text-[9px] font-bold tracking-[0.14em] shadow-sm">
+                      {prod.code}
+                    </span>
+                    <span className="absolute right-3 top-3 bg-white/95 backdrop-blur text-[#0b8faa] px-2 py-0.5 text-[9px] font-bold tracking-[0.1em]">
+                      {prod.badge}
+                    </span>
+                  </div>
+
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold tracking-[0.15em] text-[#168ca5] uppercase">{prod.material}</p>
+                      <h2 className="font-serif mt-2 text-2xl text-[#10313a] leading-tight group-hover:text-[#0d9bb4] transition">
+                        {prod.name}
+                      </h2>
+                      <p className="mt-3 text-xs leading-5 text-[#597077] line-clamp-2">
+                        {prod.desc}
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {prod.features.map((f, i) => (
+                          <span key={i} className="text-[10px] bg-[#f6f7f4] border border-[#bfd5d9]/60 px-2 py-0.5 text-[#45626a]">
+                            ✓ {f}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+                      <button 
+                        onClick={() => setSelectedProduct(prod)}
+                        className="text-xs font-bold tracking-[0.12em] text-[#0d3039] hover:text-[#0d9bb4] flex items-center gap-1.5"
+                      >
+                        XEM CHI TIẾT <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => handleAddToQuote(prod)}
+                        className="bg-[#0d3039] text-[#e4c36f] hover:bg-[#0d9bb4] hover:text-white px-3.5 py-2 text-[10px] font-bold tracking-[0.12em] transition"
+                      >
+                        + CHỌN TƯ VẤN
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      ) : (
+        <main className="flex-1">
+
+          {/* 1. HERO SECTION: DÙNG CHÍNH XÁC ẢNH 0001.JPG TỪ CATALOGUE */}
+          <section id="dau-trang" className="relative isolate overflow-hidden bg-[#dfe9ed]">
+            <div className="absolute inset-y-0 right-0 w-[54%] bg-[#0d3039] hidden md:block"></div>
+
+            <div className="relative mx-auto grid min-h-[660px] max-w-7xl items-end gap-10 px-5 py-14 lg:grid-cols-[.9fr_1.1fr] lg:px-8 lg:py-20">
+              <div className="z-10 max-w-xl self-center lg:pb-10">
+                <p className="mb-6 flex items-center gap-3 text-xs font-bold tracking-[0.22em] text-[#0b8faa]">
+                  <span className="h-px w-10 bg-current"></span> 
+                  HDC FASHION · ĐỒNG PHỤC TẠO NÊN BẢN SẮC
+                </p>
+                
+                <h1 className="font-serif text-5xl leading-[0.94] text-[#10313a] sm:text-6xl lg:text-7xl">
+                  Phong cách <br />
+                  <em className="font-normal text-[#0d9bb4]">tạo thành công.</em>
+                </h1>
+                
+                <p className="mt-7 max-w-md text-base leading-7 text-[#45626a]">
+                  HDC Fashion thiết kế và may đo đồng phục để mỗi đội ngũ xuất hiện chuyên nghiệp, khác biệt và tự hào với chất liệu xanh tự nhiên bản địa và công nghệ Seamless không đường may.
+                </p>
+                
+                <div className="mt-9 flex flex-wrap gap-3">
+                  <button 
+                    onClick={() => scrollToSection('lien-he')} 
+                    className="bg-[#0d3039] px-6 py-4 text-xs font-bold tracking-[0.12em] text-white transition hover:bg-[#0d9bb4] shadow-md"
+                  >
+                    ĐẶT THIẾT KẾ ĐỒNG PHỤC
+                  </button>
+                  <button 
+                    onClick={() => { setCurrentView('shop'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                    className="border border-[#234c55]/30 bg-white/70 backdrop-blur px-6 py-4 text-xs font-bold tracking-[0.12em] text-[#173b44] transition hover:border-[#0d9bb4] hover:text-[#0d9bb4]"
+                  >
+                    MUA SẮM NGAY
+                  </button>
+                </div>
+
+                <div className="mt-10 flex items-center gap-6 text-[11px] font-semibold text-[#597077]">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-[#0d9bb4]" /> 100% Sợi Tự Nhiên
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#0d9bb4]" /> Công Nghệ Seamless
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Truck className="w-4 h-4 text-[#0d9bb4]" /> Giao Hàng Toàn Quốc
+                  </div>
+                </div>
+              </div>
+
+              {/* Ảnh bìa Catalogue 0001.jpg */}
+              <div className="relative h-[430px] overflow-hidden sm:h-[560px] lg:h-[620px] shadow-2xl">
+                <img 
+                  src={ASSETS.heroCover}
+                  onError={(e) => { (e.target as HTMLImageElement).src = ASSETS.heroCoverFallback; }}
+                  alt="Trang bìa Catalogue HDC Fashion 0001.jpg" 
+                  className="h-full w-full object-cover object-top mix-blend-normal"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0d3039]/65 via-[#0d3039]/10 to-transparent"></div>
+                
+                <div className="absolute bottom-0 left-0 right-0 flex justify-between border-t border-white/30 px-6 py-4 text-[10px] font-bold tracking-[0.16em] text-white backdrop-blur-sm bg-black/20">
+                  <span>HDC / 01 · CATALOGUE 2023-12-28</span>
+                  <span className="text-[#e4c36f]">PHONG CÁCH TẠO THÀNH CÔNG</span>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* 2. STATS BAR */}
+          <section className="border-y border-[#153e47]/10 bg-[#f6f7f4]">
+            <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-[#153e47]/10 px-5 sm:grid-cols-4 lg:px-8 py-8 text-center">
+              <div><strong className="font-serif block text-3xl text-[#0d9bb4]">10+</strong><span className="text-[10px] font-bold text-[#5c7176]">NĂM KIẾN TẠO DIỆN MẠO</span></div>
+              <div><strong className="font-serif block text-3xl text-[#0d9bb4]">1.000+</strong><span className="text-[10px] font-bold text-[#5c7176]">MẪU THIẾT KẾ MAY ĐO</span></div>
+              <div><strong className="font-serif block text-3xl text-[#0d9bb4]">63</strong><span className="text-[10px] font-bold text-[#5c7176]">TỈNH THÀNH GIAO HÀNG MIỄN PHÍ</span></div>
+              <div><strong className="font-serif block text-3xl text-[#0d9bb4]">100%</strong><span className="text-[10px] font-bold text-[#5c7176]">TẬN TÂM TRONG TỪNG ĐƯỜNG MAY</span></div>
+            </div>
+          </section>
+
+          {/* 3. 4 LARGE FEATURED COLLECTIONS */}
+          <section id="san-pham" className="mx-auto max-w-7xl px-5 py-24 lg:px-8">
+            <div className="mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+              <div>
+                <p className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4]">BỘ SƯU TẬP DOANH NGHIỆP</p>
+                <h2 className="font-serif mt-3 text-4xl leading-none sm:text-5xl text-[#10313a]">
+                  Những điều đội ngũ <br />
+                  bạn sẽ tự hào khoác lên.
+                </h2>
+              </div>
+              <p className="max-w-xs text-sm leading-6 text-[#597077]">
+                Từ phòng họp cấp cao, sự kiện thể thao Golf đến sân trường học đường, mỗi sản phẩm HDC là một điểm chạm thương hiệu đầy cảm xúc.
+              </p>
+            </div>
+
+            <div className="grid gap-px overflow-hidden bg-[#d1dde0] md:grid-cols-2 shadow-lg">
+              {FEATURED_COLLECTIONS.map((col) => (
+                <button
+                  key={col.id}
+                  onClick={() => {
+                    setActivePreview(col);
+                    setCurrentView('shop');
+                    setActiveCategory(col.category);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="group relative min-h-[380px] overflow-hidden bg-[#eaf0f2] text-left focus:outline-none"
+                >
+                  <img 
+                    src={col.image}
+                    alt={col.title}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#082d37]/90 via-[#082d37]/35 to-transparent"></div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between p-7 text-white">
+                    <div className="max-w-md">
+                      <span className="mb-2 block text-[10px] font-bold tracking-[0.18em] text-[#7ee0eb]">
+                        {col.tag}
+                      </span>
+                      <h3 className="font-serif text-3xl sm:text-4xl text-white leading-tight">
+                        {col.title}
+                      </h3>
+                      <p className="mt-2 text-xs text-white/80 line-clamp-2">
+                        {col.subtitle}
+                      </p>
+                    </div>
+                    <div className="grid h-10 w-10 place-items-center bg-white/10 backdrop-blur rounded-full transition-transform group-hover:translate-x-1.5 group-hover:bg-[#0d9bb4]">
+                      <ArrowRight className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. CHẤT LIỆU XANH BỀN VỮNG */}
+          <section id="chat-lieu" className="bg-[#0d3039] text-white">
+            <div className="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-2 lg:px-8 items-center">
+              
+              <div className="relative min-h-[460px] overflow-hidden shadow-2xl">
+                <img 
+                  src={ASSETS.cat02}
+                  alt="Chất liệu xanh bền vững Catalogue HDC Trang 2"
+                  className="h-full w-full object-cover object-center"
+                />
+                <div className="absolute inset-0 bg-[#0d3039]/20"></div>
+                <span className="absolute left-5 top-5 border border-white/50 bg-[#0d3039]/80 backdrop-blur px-3 py-2 text-[10px] font-bold tracking-[0.17em]">
+                  MATERIAL / 01 · NGUỒN NGUYÊN LIỆU VIỆT NAM
+                </span>
+                <div className="absolute bottom-5 left-5 right-5 bg-[#08242c]/90 p-4 border border-white/10 backdrop-blur">
+                  <p className="text-[10px] font-bold text-[#e4c36f] tracking-[0.14em]">SỢI TƠ CHUỐI & XƠ DỪA BẢN ĐỊA</p>
+                  <p className="text-xs text-white/90 mt-1">
+                    Tận dụng nguyên liệu sẵn có tại Việt Nam kết hợp cùng Modal, Bamboo, Sợi Bạc Hà và Sợi Sen sinh thái.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                <p className="text-xs font-bold tracking-[0.2em] text-[#73d8e5] flex items-center gap-2">
+                  <Leaf className="w-4 h-4 text-[#73d8e5]" /> LỢI THẾ CẠNH TRANH CỐT LÕI
+                </p>
+                <h2 className="font-serif mt-4 text-4xl leading-[0.98] sm:text-5xl text-white">
+                  Tốt cho người mặc. <br />
+                  <em className="font-normal text-[#e4c36f]">Nhẹ hơn cho hành tinh.</em>
+                </h2>
+                <p className="mt-6 max-w-lg leading-7 text-[#c1d6da]">
+                  Tại HDC Fashion, chúng tôi kiên định nâng tầm giá trị cho sản phẩm Việt thông qua việc khai thác các nguyên liệu tự nhiên bản địa: sợi tơ chuối, xơ dừa cùng chất liệu cao cấp Modal, Bamboo, Sợi Bạc Hà, Sợi Sen.
+                </p>
+
+                <div className="mt-9 grid grid-cols-2 gap-x-8 gap-y-7 border-t border-white/20 pt-7 text-sm">
+                  <div>
+                    <div className="flex items-center gap-2 text-[#73d8e5]">
+                      <Leaf className="w-4 h-4" />
+                      <b className="block">Modal & Bamboo</b>
+                    </div>
+                    <span className="mt-1.5 block text-white/70 text-xs leading-5">
+                      Siêu mềm mượt, bền đẹp giữ màu cực tốt và kháng khuẩn tự nhiên.
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 text-[#73d8e5]">
+                      <Sun className="w-4 h-4" />
+                      <b className="block">Sợi Bạc Hà & Sợi Sen</b>
+                    </div>
+                    <span className="mt-1.5 block text-white/70 text-xs leading-5">
+                      Thoáng mát tự nhiên, giải nhiệt ngày hè và khử mùi kháng khuẩn.
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 text-[#73d8e5]">
+                      <Sparkles className="w-4 h-4" />
+                      <b className="block">Tơ Chuối & Xơ Dừa</b>
+                    </div>
+                    <span className="mt-1.5 block text-white/70 text-xs leading-5">
+                      Tận dụng nguồn phụ phẩm nông nghiệp bản địa Việt Nam bền bỉ và an toàn.
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 text-[#73d8e5]">
+                      <Layers className="w-4 h-4" />
+                      <b className="block">Không Cần Là Ủi</b>
+                    </div>
+                    <span className="mt-1.5 block text-white/70 text-xs leading-5">
+                      Chống nhăn tự nhiên, giặt phơi nhanh khô, tiết kiệm thời gian cho nhân sự.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* 5. CÔNG NGHỆ SEAMLESS */}
+          <section id="cong-nghe" className="border-b border-[#153e47]/10 bg-[#f6f7f4] py-24">
+            <div className="mx-auto max-w-7xl px-5 lg:px-8">
+              <div className="grid gap-12 lg:grid-cols-[1.1fr_.9fr] items-center">
+                
+                <div>
+                  <p className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4]">ĐỘT PHÁ CÔNG NGHỆ</p>
+                  <h2 className="font-serif mt-3 text-4xl sm:text-5xl text-[#10313a] leading-tight">
+                    Công nghệ Seamless. <br />
+                    <em className="font-normal text-[#0d9bb4]">Sơ mi không đường may.</em>
+                  </h2>
+                  <p className="mt-6 text-base leading-7 text-[#597077]">
+                    Áp dụng công nghệ ép nhiệt liền mạch tiên tiến tại <b className="text-[#102a32]">tay áo, nẹp áo và vạt áo</b>. Loại bỏ hoàn toàn sự thô ráp của chỉ may truyền thống, kết hợp chất vải co giãn 4 chiều siêu nhẹ, đem lại cảm giác siêu mềm mịn và tự do tuyệt đối trong mọi cử động.
+                  </p>
+
+                  <div className="mt-8 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 grid h-6 w-6 place-items-center bg-[#0d9bb4]/15 text-[#0d9bb4] rounded-full flex-shrink-0">
+                        <Check className="w-3.5 h-3.5" />
+                      </span>
+                      <div>
+                        <strong className="text-sm font-bold text-[#102a32]">Áp dụng tại tay áo, nẹp áo, vạt áo:</strong>
+                        <p className="text-xs text-[#597077] mt-0.5">Mối ép phẳng mịn tuyệt đối, bảo vệ làn da ngay cả khi mặc suốt 12 tiếng liên tục.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 grid h-6 w-6 place-items-center bg-[#0d9bb4]/15 text-[#0d9bb4] rounded-full flex-shrink-0">
+                        <Check className="w-3.5 h-3.5" />
+                      </span>
+                      <div>
+                        <strong className="text-sm font-bold text-[#102a32]">Vải co giãn 4 chiều siêu nhẹ:</strong>
+                        <p className="text-xs text-[#597077] mt-0.5">Trọng lượng áo siêu nhẹ, cảm giác êm ái tựa làn da thứ hai.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 grid h-6 w-6 place-items-center bg-[#0d9bb4]/15 text-[#0d9bb4] rounded-full flex-shrink-0">
+                        <Check className="w-3.5 h-3.5" />
+                      </span>
+                      <div>
+                        <strong className="text-sm font-bold text-[#102a32]">Giữ form đứng không quăn mép:</strong>
+                        <p className="text-xs text-[#597077] mt-0.5">Cổ áo và nẹp áo luôn giữ phom dáng chuẩn mực ngay cả khi giặt máy.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-9 flex items-center gap-4">
+                    <button 
+                      onClick={() => {
+                        setCurrentView('shop');
+                        setActiveCategory('shirt');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="bg-[#0d3039] text-white px-6 py-3.5 text-xs font-bold tracking-[0.12em] hover:bg-[#0d9bb4] transition shadow-md"
+                    >
+                      XEM MẪU SƠ MI SEAMLESS
+                    </button>
+                    <button 
+                      onClick={() => scrollToSection('lien-he')}
+                      className="text-xs font-bold tracking-[0.12em] text-[#0d9bb4] hover:underline"
+                    >
+                      Đăng ký may mẫu thử →
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div className="aspect-[4/3] overflow-hidden shadow-xl bg-gray-200">
+                    <img 
+                      src={ASSETS.cat03}
+                      alt="Công nghệ Seamless Catalogue HDC Trang 3"
+                      className="h-full w-full object-cover object-center"
+                    />
+                  </div>
+                  <div className="absolute -bottom-6 -left-6 bg-white p-5 shadow-2xl border border-[#153e47]/10 max-w-xs hidden sm:block">
+                    <p className="text-[10px] font-bold text-[#0d9bb4] tracking-[0.16em]">CHI TIẾT ÉP NHIỆT KHÔNG ĐƯỜNG MAY</p>
+                    <p className="text-xs font-serif text-[#102a32] mt-1 text-lg">Mềm mịn tựa làn da thứ hai</p>
+                    <p className="text-[11px] text-[#597077] mt-1">Co giãn 4 chiều siêu nhẹ</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* 6. DỰ ÁN & DI SẢN */}
+          <section id="du-an" className="mx-auto max-w-7xl px-5 py-24 lg:px-8">
+            <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
+              <div>
+                <p className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4]">DỰ ÁN / DI SẢN VĂN HÓA</p>
+                <h2 className="font-serif mt-3 text-5xl leading-[0.92] text-[#10313a]">
+                  Trang phục <br />
+                  kể câu chuyện <br />
+                  <em className="font-normal text-[#0d9bb4]">của tập thể & dân tộc.</em>
+                </h2>
+                <p className="mt-7 max-w-sm text-sm leading-7 text-[#597077]">
+                  HDC Fashion vinh dự mang hồn thiêng sông núi vào trang phục hiện đại qua 4 biểu tượng di sản: <b className="text-[#102a32]">Hang Xóm Trại, Trống đồng cổ, Núi Đầu Rồng và Suối nước nóng Kim Bôi</b>.
+                </p>
+
+                <div className="mt-8 space-y-3 border-l-2 border-[#0d9bb4] pl-4 text-xs text-[#45626a]">
+                  <p>✓ <b>Miễn phí tư vấn & thiết kế</b> nhận diện độc quyền</p>
+                  <p>✓ <b>Không giới hạn số lần sửa mẫu</b> đến khi đối tác hài lòng</p>
+                  <p>✓ <b>Miễn phí giao hàng</b> 63 tỉnh thành toàn quốc</p>
+                </div>
+
+                <button 
+                  onClick={() => scrollToSection('lien-he')}
+                  className="group mt-8 flex items-center gap-3 text-xs font-bold tracking-[0.12em] text-[#0d3039]"
+                >
+                  KỂ CHO CHÚNG TÔI VỀ ĐỘI NGŨ CỦA BẠN 
+                  <span aria-hidden="true" className="text-xl transition-transform group-hover:translate-x-1.5 text-[#0d9bb4]">→</span>
+                </button>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="sm:pt-16">
+                  <div className="overflow-hidden shadow-md aspect-[3/4] bg-gray-100">
+                    <img 
+                      src={ASSETS.cat07}
+                      alt="Đồng phục doanh nghiệp Catalogue HDC Trang 7" 
+                      className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] font-bold tracking-[0.14em] text-[#0d9bb4]">DOANH NGHIỆP & GOLF</p>
+                  <h3 className="mt-1 font-serif text-2xl text-[#10313a]">Đồng phục, dấu ấn tập thể</h3>
+                  <p className="text-xs text-[#597077] mt-1">Đồng hành cùng hàng trăm doanh nghiệp tại các sự kiện thể thao và giải đấu Golf uy tín.</p>
+                </div>
+
+                <div>
+                  <div className="overflow-hidden shadow-md aspect-[3/4] bg-gray-100">
+                    <img 
+                      src={ASSETS.cat04}
+                      alt="Họa tiết văn hóa Việt Nam Catalogue HDC Trang 4" 
+                      className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] font-bold tracking-[0.14em] text-[#0d9bb4]">SÁNG TẠO / DI SẢN BẢN ĐỊA</p>
+                  <h3 className="mt-1 font-serif text-2xl text-[#10313a]">Bản sắc Việt trong từng chi tiết</h3>
+                  <p className="text-xs text-[#597077] mt-1">Hang Xóm Trại, Trống đồng cổ, Núi Đầu Rồng, Suối khoáng Kim Bôi được cách điệu tinh tế.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 7. VỀ HDC & FOUNDER */}
+          <section id="ve-hdc" className="bg-[#e2eff1]">
+            <div className="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-[1.08fr_.92fr] lg:px-8 items-center">
+              
+              <div>
+                <p className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4]">CON NGƯỜI HDC GROUP</p>
+                <h2 className="font-serif mt-4 max-w-2xl text-4xl leading-[0.98] sm:text-5xl text-[#10313a]">
+                  Sự tự tin của đội ngũ bắt đầu từ <br />
+                  <em className="font-normal text-[#0d9bb4]">sự thấu hiểu sâu sắc.</em>
+                </h2>
+                
+                <p className="mt-5 text-sm leading-7 text-[#597077]">
+                  Chúng tôi không chỉ may đo những chiếc áo; chúng tôi lắng nghe câu chuyện văn hoá, môi trường làm việc và khát vọng thành công của thương hiệu bạn.
+                </p>
+
+                <div className="mt-10 grid gap-px bg-[#bfd5d9] sm:grid-cols-3 shadow-sm">
+                  <div className="bg-[#e2eff1] p-6 hover:bg-white transition">
+                    <span className="text-xs font-bold text-[#0d9bb4]">01</span>
+                    <h3 className="mt-6 font-serif text-2xl text-[#10313a]">Lắng nghe</h3>
+                    <p className="mt-2 text-xs leading-6 text-[#597077]">
+                      Thấu hiểu sâu sắc bản sắc thương hiệu và nhu cầu vận động thực tế của bạn.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#e2eff1] p-6 hover:bg-white transition">
+                    <span className="text-xs font-bold text-[#0d9bb4]">02</span>
+                    <h3 className="mt-6 font-serif text-2xl text-[#10313a]">Sáng tạo</h3>
+                    <p className="mt-2 text-xs leading-6 text-[#597077]">
+                      Biến nhận diện thương hiệu thành bản thiết kế độc bản với chất liệu xanh tự nhiên.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#e2eff1] p-6 hover:bg-white transition">
+                    <span className="text-xs font-bold text-[#0d9bb4]">03</span>
+                    <h3 className="mt-6 font-serif text-2xl text-[#10313a]">Đồng hành</h3>
+                    <p className="mt-2 text-xs leading-6 text-[#597077]">
+                      May đo tỉ mỉ, giao nhận tận nơi và chính sách bảo hành, sửa mẫu dài lâu.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden shadow-2xl">
+                <img 
+                  src={ASSETS.founder}
+                  alt="Bà Nguyễn Thị Thương, Founder & CEO HDC Group VN" 
+                  className="h-full min-h-[480px] w-full object-cover object-[60%_center]"
+                />
+                
+                <div className="absolute bottom-0 left-0 max-w-sm bg-[#0d3039] p-6 text-white border-t-2 border-[#e4c36f]">
+                  <p className="font-serif text-2xl text-white">Nguyễn Thị Thương</p>
+                  <p className="mt-1 text-[10px] font-bold tracking-[0.14em] text-[#e4c36f]">FOUNDER &amp; CEO · HDC GROUP VN</p>
+                  <p className="mt-3 text-xs text-white/70 italic">
+                    "Mỗi bộ trang phục khoác lên người không đơn thuần là vải vóc, mà là phong cách tạo nên sự tự tin và thành công bền vững."
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* 8. FORM LIÊN HỆ */}
+          <section id="lien-he" className="bg-[#0d3039] text-white">
+            <div className="mx-auto grid max-w-7xl gap-12 px-5 py-24 lg:grid-cols-[.9fr_1.1fr] lg:px-8">
+              
+              <div>
+                <p className="text-xs font-bold tracking-[0.2em] text-[#73d8e5]">BẮT ĐẦU TỪ MỘT CUỘC TRÒ CHUYỆN</p>
+                <h2 className="font-serif mt-4 text-5xl leading-[0.95] text-white">
+                  Đội ngũ của bạn <br />
+                  sẽ mặc gì <br />
+                  <em className="font-normal text-[#e4c36f]">vào ngày mai?</em>
+                </h2>
+                <p className="mt-7 max-w-md leading-7 text-[#c1d6da]">
+                  Chia sẻ nhu cầu, quy mô nhân sự và thời điểm bạn cần. HDC Fashion sẽ đề xuất giải pháp chất liệu xanh và gửi báo giá ưu đãi trong thời gian sớm nhất.
+                </p>
+
+                <a 
+                  href="tel:0984959586" 
+                  className="mt-8 inline-flex items-center gap-3 border-b-2 border-[#e4c36f] pb-2 text-2xl font-bold text-[#e4c36f] hover:text-white transition"
+                >
+                  <Phone className="w-6 h-6" /> 0984 95 95 86 <span>↗</span>
+                </a>
+
+                <div className="mt-8 space-y-3 text-xs text-[#c1d6da]">
+                  <div className="flex items-center gap-2.5">
+                    <MapPin className="w-4 h-4 text-[#73d8e5]" />
+                    <span><b>Địa chỉ:</b> Số 6, Kim Đồng, Hoàng Mai, Hà Nội</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Globe className="w-4 h-4 text-[#73d8e5]" />
+                    <span><b>Website:</b> hdcfashion.vn</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Truck className="w-4 h-4 text-[#73d8e5]" />
+                    <span><b>Phạm vi:</b> Miễn phí giao hàng 63 tỉnh thành</span>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleFormSubmit} className="grid content-start gap-5 border-t border-white/20 pt-7 sm:grid-cols-2">
+                <label className="text-xs font-bold tracking-[0.1em] text-[#c1d6da]">
+                  HỌ VÀ TÊN *
+                  <input 
+                    type="text"
+                    required 
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="mt-2 w-full border-b border-white/30 bg-transparent py-3 text-base font-normal text-white outline-none transition focus:border-[#73d8e5]" 
+                    placeholder="Nguyễn Văn A"
+                  />
+                </label>
+
+                <label className="text-xs font-bold tracking-[0.1em] text-[#c1d6da]">
+                  SỐ ĐIỆN THOẠI (ZALO) *
+                  <input 
+                    type="tel"
+                    required 
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="mt-2 w-full border-b border-white/30 bg-transparent py-3 text-base font-normal text-white outline-none transition focus:border-[#73d8e5]" 
+                    placeholder="0984..."
+                  />
+                </label>
+
+                <label className="text-xs font-bold tracking-[0.1em] text-[#c1d6da]">
+                  TÊN TỔ CHỨC / DOANH NGHIỆP
+                  <input 
+                    type="text"
+                    value={formData.company}
+                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    className="mt-2 w-full border-b border-white/30 bg-transparent py-3 text-base font-normal text-white outline-none transition focus:border-[#73d8e5]" 
+                    placeholder="Công ty / Trường học..."
+                  />
+                </label>
+
+                <label className="text-xs font-bold tracking-[0.1em] text-[#c1d6da]">
+                  SỐ LƯỢNG DỰ KIẾN
+                  <select 
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                    className="mt-2 w-full border-b border-white/30 bg-[#0d3039] py-3 text-base font-normal text-white outline-none transition focus:border-[#73d8e5]"
+                  >
+                    <option value="Dưới 50 áo">Dưới 50 áo</option>
+                    <option value="50 - 200 áo">50 - 200 áo (Tiêu chuẩn)</option>
+                    <option value="200 - 1.000 áo">200 - 1.000 áo (Ưu đãi B2B)</option>
+                    <option value="Trên 1.000 áo">Trên 1.000 áo (Tập đoàn / Trường học)</option>
+                  </select>
+                </label>
+
+                <label className="sm:col-span-2 text-xs font-bold tracking-[0.1em] text-[#c1d6da]">
+                  NHU CẦU MAY ĐO HOẶC YÊU CẦU CHẤT LIỆU
+                  <textarea 
+                    rows={3}
+                    required
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    className="mt-2 w-full resize-none border-b border-white/30 bg-transparent py-3 text-base font-normal text-white outline-none transition focus:border-[#73d8e5]" 
+                    placeholder="Ví dụ: Cần may đồng phục sơ mi Seamless cho 80 nhân viên ngân hàng và 150 polo sự kiện giải Golf..."
+                  />
+                </label>
+
+                <div className="sm:col-span-2 flex flex-wrap items-center gap-4 mt-2">
+                  <button 
+                    type="submit"
+                    className="bg-[#e4c36f] px-8 py-4 text-xs font-bold tracking-[0.13em] text-[#102a32] transition hover:bg-white shadow-lg"
+                  >
+                    {isFormSubmitted ? 'ĐÃ GỬI YÊU CẦU THÀNH CÔNG ✓' : 'GỬI YÊU CẦU BÁO GIÁ'}
+                  </button>
+
+                  {isFormSubmitted && (
+                    <p className="text-sm font-semibold text-[#73d8e5] animate-pulse">
+                      Cảm ơn bạn. Chuyên viên thiết kế HDC sẽ liên hệ trong 15 phút!
+                    </p>
+                  )}
+                </div>
+              </form>
+            </div>
+          </section>
+
+        </main>
+      )}
+
+      {/* FOOTER */}
+      <footer className="bg-[#08242c] text-[#b3c9cd] border-t border-white/10">
+        <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 pb-10 border-b border-white/10 text-xs">
+            <div>
+              <div className="flex items-center gap-2 text-white">
+                <span className="grid h-8 w-8 place-items-center bg-[#0d9bb4] text-sm font-black text-white">H</span>
+                <span className="font-bold text-base tracking-wider">HDC FASHION</span>
+              </div>
+              <p className="mt-3 text-white/70 leading-6">
+                Thương hiệu thời trang & may đo đồng phục doanh nghiệp tiên phong chất liệu xanh tự nhiên và công nghệ sơ mi Seamless tại Việt Nam.
+              </p>
+              <p className="mt-3 text-[#e4c36f] font-semibold">"Phong cách tạo thành công"</p>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold tracking-[0.15em] uppercase mb-3">DANH MỤC SẢN PHẨM</h4>
+              <ul className="space-y-2 text-white/75">
+                <li><button onClick={() => { setCurrentView('shop'); setActiveCategory('shirt'); }} className="hover:text-[#0d9bb4]">Sơ mi xanh tự nhiên</button></li>
+                <li><button onClick={() => { setCurrentView('shop'); setActiveCategory('shirt'); }} className="hover:text-[#0d9bb4]">Sơ mi Seamless không đường may</button></li>
+                <li><button onClick={() => { setCurrentView('shop'); setActiveCategory('polo'); }} className="hover:text-[#0d9bb4]">Polo sự kiện & Golf Anti-UV</button></li>
+                <li><button onClick={() => { setCurrentView('shop'); setActiveCategory('kids'); }} className="hover:text-[#0d9bb4]">Đồng phục học sinh IHDC Kids</button></li>
+                <li><button onClick={() => { setCurrentView('shop'); setActiveCategory('heritage'); }} className="hover:text-[#0d9bb4]">Bộ sưu tập Di sản Văn hóa Việt</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold tracking-[0.15em] uppercase mb-3">CAM KẾT DỊCH VỤ B2B</h4>
+              <ul className="space-y-2 text-white/75">
+                <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#0d9bb4]" /> Miễn phí tư vấn thiết kế 2D/3D</li>
+                <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#0d9bb4]" /> Không giới hạn số lần sửa mẫu</li>
+                <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#0d9bb4]" /> May mẫu thử trực tiếp tận nơi</li>
+                <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#0d9bb4]" /> Miễn phí giao hàng 63 tỉnh thành</li>
+                <li className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-[#0d9bb4]" /> Bảo hành đường may trọn đời</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold tracking-[0.15em] uppercase mb-3">LIÊN HỆ TRỰC TIẾP</h4>
+              <ul className="space-y-2.5 text-white/75">
+                <li className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-[#e4c36f] flex-shrink-0 mt-0.5" />
+                  <span>Số 6, Kim Đồng, Hoàng Mai, Hà Nội</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-[#e4c36f] flex-shrink-0" />
+                  <a href="tel:0984959586" className="text-white font-bold hover:text-[#e4c36f]">0984 95 95 86</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-[#e4c36f] flex-shrink-0" />
+                  <a href="https://hdcfashion.vn" target="_blank" rel="noreferrer" className="hover:underline">hdcfashion.vn</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col justify-between gap-4 text-[10px] font-bold tracking-[0.12em] sm:flex-row text-white/60">
+            <span>© 2025 HDC FASHION · PHONG CÁCH TẠO THÀNH CÔNG</span>
+            <span>THIẾT KẾ · MAY ĐO · GIAO HÀNG TOÀN QUỐC · NGUYÊN LIỆU BẢN ĐỊA VIỆT NAM</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* FLOATING INDICATOR */}
+      {activePreview && (
+        <div className="pointer-events-auto fixed bottom-5 right-5 z-50 hidden max-w-xs bg-white/95 p-4 shadow-2xl backdrop-blur border border-[#153e47]/15 md:block">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[9px] font-bold tracking-[0.16em] text-[#0d9bb4]">BỘ SƯU TẬP TIÊU BIỂU</p>
+              <p className="font-serif mt-1 text-lg leading-tight text-[#102a32]">{activePreview.title}</p>
+              <p className="text-[11px] text-[#597077] mt-0.5">{activePreview.subtitle}</p>
+            </div>
+            <button 
+              onClick={() => {
+                setCurrentView('shop');
+                setActiveCategory(activePreview.category);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="bg-[#0d3039] text-[#e4c36f] p-2 hover:bg-[#0d9bb4] hover:text-white transition"
+              title="Xem bộ sưu tập"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CHI TIẾT SẢN PHẨM */}
+      {selectedProduct && (
+        <div 
+          className="fixed inset-0 z-50 grid place-items-center bg-[#06232b]/75 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedProduct(null)}
+        >
+          <div 
+            className="grid w-full max-w-3xl overflow-hidden bg-[#f6f7f4] sm:grid-cols-2 shadow-2xl border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative min-h-[320px] bg-[#e8eef0]">
+              <img 
+                src={selectedProduct.image}
+                alt={selectedProduct.name}
+                className="h-full w-full object-cover"
+              />
+              <span className="absolute top-4 left-4 bg-[#0d3039] text-[#e4c36f] px-2.5 py-1 text-[10px] font-bold tracking-[0.14em]">
+                {selectedProduct.code}
+              </span>
+            </div>
+
+            <div className="relative flex flex-col justify-between p-8 text-[#102a32]">
+              <button 
+                onClick={() => setSelectedProduct(null)} 
+                className="absolute right-4 top-4 text-2xl text-[#597077] hover:text-red-500 focus:outline-none"
+                aria-label="Đóng"
+              >
+                ×
+              </button>
+
+              <div>
+                <span className="text-[10px] font-bold tracking-[0.16em] text-[#0d9bb4] uppercase">
+                  {selectedProduct.badge}
+                </span>
+                <h2 className="font-serif mt-2 text-2xl sm:text-3xl leading-tight">
+                  {selectedProduct.name}
+                </h2>
+                
+                <p className="mt-3 text-xs font-semibold text-[#168ca5]">
+                  Chất liệu: {selectedProduct.material}
+                </p>
+
+                <p className="mt-3 text-xs leading-6 text-[#597077]">
+                  {selectedProduct.desc}
+                </p>
+
+                <div className="mt-4 space-y-1.5 text-xs text-[#284850]">
+                  {selectedProduct.features.map((f, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-[#0d9bb4]" />
+                      <span>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5">
+                  <p className="text-[10px] font-bold tracking-[0.12em] text-[#597077] uppercase">KÍCH CỠ / MAY ĐO:</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {['S', 'M', 'L', 'XL', 'XXL', 'May đo 3D'].map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-3 py-1.5 text-xs font-bold transition ${
+                          selectedSize === size
+                            ? 'bg-[#0d3039] text-white'
+                            : 'border border-gray-300 text-[#45626a] hover:border-[#0d9bb4]'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 flex items-center gap-3 pt-4 border-t border-gray-200">
+                <button 
+                  onClick={() => handleAddToQuote(selectedProduct)} 
+                  className="bg-[#0d3039] px-6 py-3.5 text-xs font-bold tracking-[0.12em] text-white hover:bg-[#0d9bb4] transition flex-1"
+                >
+                  THÊM VÀO GIỎ TƯ VẤN
+                </button>
+                <button 
+                  onClick={() => {
+                    setSelectedProduct(null);
+                    scrollToSection('lien-he');
+                  }}
+                  className="border border-[#0d3039] px-4 py-3.5 text-xs font-bold tracking-[0.12em] text-[#0d3039] hover:bg-[#0d3039] hover:text-white transition"
+                >
+                  BÁO GIÁ NGAY
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QUOTE DRAWER */}
+      {isCartOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-[#06232b]/70 backdrop-blur-sm flex justify-end"
+          onClick={() => setIsCartOpen(false)}
+        >
+          <div 
+            className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col p-6 text-[#102a32]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+              <div>
+                <h3 className="font-serif text-2xl text-[#10313a]">Danh Sách Tư Vấn</h3>
+                <p className="text-xs text-[#597077]">Đã chọn {consultationList.length} mẫu đồng phục</p>
+              </div>
+              <button 
+                onClick={() => setIsCartOpen(false)}
+                className="p-2 text-gray-500 hover:text-black focus:outline-none"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              {consultationList.length === 0 ? (
+                <div className="text-center py-12 text-[#597077]">
+                  <ShoppingBag className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                  <p className="text-sm">Chưa có mẫu nào trong danh sách tư vấn.</p>
+                  <button 
+                    onClick={() => { setIsCartOpen(false); setCurrentView('shop'); }}
+                    className="mt-4 bg-[#0d3039] text-[#e4c36f] px-5 py-2.5 text-xs font-bold tracking-[0.1em]"
+                  >
+                    KHÁM PHÁ GIAN HÀNG
+                  </button>
+                </div>
+              ) : (
+                consultationList.map((item, index) => (
+                  <div key={index} className="flex gap-3 border p-3 border-gray-100 bg-[#f9fafb]">
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="w-16 h-16 object-cover bg-gray-200 flex-shrink-0"
+                    />
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-[#0d9bb4]">{item.code}</p>
+                      <h4 className="font-bold text-sm leading-tight text-[#102a32]">{item.name}</h4>
+                      <p className="text-[11px] text-gray-500 mt-1">Size: {item.size} · {item.material}</p>
+                    </div>
+                    <button 
+                      onClick={() => setConsultationList(prev => prev.filter((_, i) => i !== index))}
+                      className="text-gray-400 hover:text-red-500 self-start text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {consultationList.length > 0 && (
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                <p className="text-[11px] text-[#597077]">
+                  * HDC Fashion miễn phí tư vấn thiết kế 2D/3D và không giới hạn số lần sửa mẫu cho các mẫu bạn đã chọn.
+                </p>
+                <button 
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    scrollToSection('lien-he');
+                  }}
+                  className="w-full bg-[#0d3039] text-[#e4c36f] hover:bg-[#0d9bb4] hover:text-white py-4 text-xs font-bold tracking-[0.14em] transition text-center shadow-lg"
+                >
+                  GỬI YÊU CẦU BÁO GIÁ CHO {consultationList.length} MẪU NÀY
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

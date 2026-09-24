@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DESIGN_DCH</title>
+    
+    <meta name="description" content="Preview and interact with your website code instantly to streamline development and ensure accurate design implementation before deployment.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:title" content="DESIGN_DCH">
+    <meta property="og:description" content="Preview and interact with your website code instantly to streamline development and ensure accurate design implementation before deployment.">
+    <script type="module" crossorigin src="https://table-vector-74249268.figma.site/assets/index-BwLBFkqm.js"></script>
+    <link rel="stylesheet" crossorigin href="https://table-vector-74249268.figma.site/assets/index-CVuuHKSl.css">
+  </head>
+  <body>
+    
+    <div id="root"></div>
+    
+  <script defer src="/__figma__/make_community_banner_v1.js"></script></body>
+</html>
