@@ -83,13 +83,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             onError={(e) => {
               (e.target as HTMLImageElement).src = ASSETS.heroCoverFallback;
             }}
-            alt="Trang bìa Catalogue HDC Fashion 0001.jpg"
+            alt="Bộ sưu tập HDC Fashion Cao Cấp"
             className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0d3039]/70 via-[#0d3039]/15 to-transparent" />
 
           <div className="absolute bottom-0 left-0 right-0 flex justify-between border-t border-white/30 px-6 py-4 text-[10px] font-bold tracking-[0.16em] text-white backdrop-blur-sm bg-black/20">
-            <span>HDC / 01 · CATALOGUE 2023-12-28</span>
+            <span>HDC FASHION · PREMIUM UNIFORM</span>
             <span className="text-[#e4c36f]">PHONG CÁCH TẠO THÀNH CÔNG</span>
           </div>
         </div>

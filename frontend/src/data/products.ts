@@ -104,7 +104,7 @@ export const ALL_PRODUCTS: Product[] = [
     price: 'Quà tặng & Doanh nhân',
     image: ASSETS.accessoryWallet,
     badge: 'Phụ kiện cao cấp',
-    desc: 'Tỉ mỉ trong từng phụ kiện từ Catalogue Trang 4. Ví da nam cao cấp chế tác thủ công từ da bò nguyên tấm, đường kim mũi chỉ chuẩn mực, quà tặng trang trọng cho đối tác và ban lãnh đạo.',
+    desc: 'Tỉ mỉ trong từng phụ kiện. Ví da nam cao cấp chế tác thủ công từ da bò nguyên tấm, đường kim mũi chỉ chuẩn mực, quà tặng trang trọng cho đối tác và ban lãnh đạo.',
     highlights: ['Thiết kế đa ngăn đựng thẻ và tiền mặt tiện dụng', 'Dập logo hoặc khắc laser tên doanh nghiệp', 'Hộp đựng sang trọng đi kèm hoa thơm'],
     sizes: ['Tiêu chuẩn (12 x 9.5 cm)', 'Đặt theo kích thước riêng']
   },
@@ -118,7 +118,7 @@ export const ALL_PRODUCTS: Product[] = [
     price: 'HDC LIMITED',
     image: ASSETS.accessoryBelt,
     badge: 'HDC LIMITED',
-    desc: 'Thắt lưng da cao cấp dòng HDC LIMITED xuất hiện tại Catalogue Trang 4 với 2 phiên bản khóa chữ H mạ vàng biểu trưng cho sự vững chắc, đẳng cấp và thành công.',
+    desc: 'Thắt lưng da cao cấp dòng HDC LIMITED với 2 phiên bản khóa chữ H mạ vàng biểu trưng cho sự vững chắc, đẳng cấp và thành công.',
     highlights: ['Khóa tự động chống trầy xước', 'Bản dây 3.5cm chuẩn công sở và veston', 'Khắc chìm dòng chữ HDC LIMITED tinh xảo bên trong'],
     sizes: ['110 cm', '115 cm', '120 cm', '125 cm', 'Tùy chỉnh']
   },

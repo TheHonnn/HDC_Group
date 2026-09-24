@@ -86,7 +86,7 @@ export const SeamlessTech: React.FC<SeamlessTechProps> = ({
             >
               <img
                 src={ASSETS.cat03}
-                alt="Công nghệ Seamless Catalogue HDC Trang 3"
+                alt="Công nghệ Seamless HDC"
                 className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105 group-hover:opacity-85"
               />
               <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />

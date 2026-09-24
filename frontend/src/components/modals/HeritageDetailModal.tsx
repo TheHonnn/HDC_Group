@@ -66,7 +66,7 @@ export const HeritageDetailModal: React.FC<HeritageDetailModalProps> = ({
           <div>
             <span className="text-[10px] font-bold tracking-[0.2em] text-[#e4c36f] uppercase flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#e4c36f]" />
-              DI SẢN VĂN HÓA VIỆT NAM · CATALOGUE TRANG 04
+              DI SẢN VĂN HÓA VIỆT NAM
             </span>
             <h2 className="font-serif text-xl sm:text-2xl text-white font-bold mt-0.5">
               {symbol.name}
@@ -285,7 +285,7 @@ export const HeritageDetailModal: React.FC<HeritageDetailModalProps> = ({
                 }}
                 className="w-full text-[11px] text-[#0d9bb4] hover:underline flex items-center justify-center gap-1 py-1"
               >
-                <BookOpen className="w-3.5 h-3.5" /> Xem trọn vẹn Catalogue Trang 04 gốc
+                <BookOpen className="w-3.5 h-3.5" /> Xem trọn vẹn Catalogue gốc
               </button>
             </div>
 

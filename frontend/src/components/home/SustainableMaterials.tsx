@@ -17,13 +17,10 @@ export const SustainableMaterials: React.FC = () => {
         >
           <img
             src={ASSETS.cat02}
-            alt="Chất liệu xanh bền vững Catalogue HDC Trang 2"
+            alt="Chất liệu xanh bền vững tự nhiên HDC"
             className="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105 group-hover:opacity-85"
           />
           <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          
-          <span className="absolute left-5 top-5 border border-white/50 bg-[#0d3039]/80 backdrop-blur px-3 py-2 text-[10px] font-bold tracking-[0.17em] flex items-center gap-1.5">
-          </span>
 
           <div className="absolute bottom-5 left-5 right-5 bg-[#08242c]/90 p-5 border border-white/10 backdrop-blur">
             <p className="text-[10px] font-bold text-[#e4c36f] tracking-[0.14em]">

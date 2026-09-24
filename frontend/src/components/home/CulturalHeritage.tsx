@@ -113,13 +113,10 @@ export const CulturalHeritage: React.FC<CulturalHeritageProps> = ({ onTellStory 
             >
               <img
                 src={ASSETS.cat07}
-                alt="Đồng phục doanh nghiệp Catalogue HDC Trang 7"
+                alt="Đồng phục doanh nghiệp HDC"
                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105 group-hover:opacity-85"
               />
               <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-              <span className="absolute bottom-3 left-3 text-white text-[10px] font-bold tracking-wider transition">
-                CATALOGUE TRANG 07
-              </span>
             </div>
             <p className="mt-3 text-[10px] font-bold tracking-[0.14em] text-[#0d9bb4]">
               DOANH NGHIỆP &amp; GOLF
@@ -142,13 +139,10 @@ export const CulturalHeritage: React.FC<CulturalHeritageProps> = ({ onTellStory 
             >
               <img
                 src={ASSETS.cat04}
-                alt="Họa tiết văn hóa Việt Nam Catalogue HDC Trang 4"
+                alt="Họa tiết văn hóa Việt Nam"
                 className="h-full w-full object-cover transition duration-700 group-hover:scale-105 group-hover:opacity-85"
               />
               <div className="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-              <span className="absolute bottom-3 left-3 text-white text-[10px] font-bold tracking-wider transition">
-                CATALOGUE TRANG 04
-              </span>
             </div>
             <p className="mt-3 text-[10px] font-bold tracking-[0.14em] text-[#0d9bb4]">
               SÁNG TẠO / DI SẢN BẢN ĐỊA
@@ -279,7 +273,7 @@ export const CulturalHeritage: React.FC<CulturalHeritageProps> = ({ onTellStory 
       <div className="mt-20">
         <div className="text-center max-w-3xl mx-auto mb-12">
           <span className="text-xs font-bold tracking-[0.2em] text-[#0d9bb4] uppercase">
-            CATALOGUE TRANG 04 · TỈ MỈ TRONG TỪNG PHỤ KIỆN
+            BỘ SƯU TẬP PHỤ KIỆN · TỈ MỈ TRONG TỪNG CHI TIẾT
           </span>
           <h3 className="font-serif mt-2 text-3xl sm:text-4xl text-[#10313a] font-bold">
             Ví Da, Thắt Lưng, Sơ Mi Cổ Họa Tiết &amp; Cavat
