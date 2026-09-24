@@ -1,5 +1,5 @@
 # HDC Fashion - Đồng Phục & Thời Trang Doanh Nghiệp
-Copy share: hdc-group-hshd-8r4kuw0ff-thehonn.vercel.app
+[🌐 Xem website](https://hdc-group-hshd-8r4kuw0ff-thehonn.vercel.app)
 > **Phong Cách Tạo Thành Công** — Thương hiệu thời trang đồng phục cao cấp, tiên phong chất liệu xanh tự nhiên (tơ chuối, xơ dừa, sen, bamboo) và công nghệ Seamless không đường may.
 >
 > 🌐 Website demo :
