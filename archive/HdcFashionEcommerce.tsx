@@ -691,7 +691,6 @@ export default function HDCFashionEcommerce() {
                 />
                 <div className="absolute inset-0 bg-[#0d3039]/20"></div>
                 <span className="absolute left-5 top-5 border border-white/50 bg-[#0d3039]/80 backdrop-blur px-3 py-2 text-[10px] font-bold tracking-[0.17em]">
-                  MATERIAL / 01 · NGUỒN NGUYÊN LIỆU VIỆT NAM
                 </span>
                 <div className="absolute bottom-5 left-5 right-5 bg-[#08242c]/90 p-4 border border-white/10 backdrop-blur">
                   <p className="text-[10px] font-bold text-[#e4c36f] tracking-[0.14em]">SỢI TƠ CHUỐI & XƠ DỪA BẢN ĐỊA</p>
